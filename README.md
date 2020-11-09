@@ -15,3 +15,9 @@ a Learned Index structure based on the [research work by Kraska & al.](https://a
 - [ ] a sort algorythm using learned structure
 - [ ] recursive indexes with topdown approarch
 - [ ] learning on string type
+
+## related works
+
+* Tim Kraska, Alex Beutel, Ed H. Chi, Jeffrey Dean, and Neoklis Polyzotis. 2018. The Case for Learned Index Structures. In Proceedings of the 2018 International Conference on Management of Data (SIGMOD '18). Association for Computing Machinery, New York, NY, USA, 489–504. DOI:https://doi.org/10.1145/3183713.3196909
+
+* [Ryan Marcus RMI's reference implementation](https://github.com/learnedsystems/RMI)
