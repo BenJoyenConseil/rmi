@@ -21,12 +21,13 @@ func TestNew(t *testing.T) {
 
 func TestGuessIndex(t *testing.T) {
 	idx := &LearnedIndex{
-		m:   &RegressionModel{intercept: .23119036646681634, slope: .08523040437506509},
-		len: 7,
+		m:        &RegressionModel{intercept: .23119036646681634, slope: .08523040437506509},
+		len:      7,
+		maxError: 2,
 	}
 
 	// when
-	guess, lower, upper := idx.GuessIndex(1.)
+	guess, lower, upper := idx.GuessIndex(2.95)
 
 	// then
 	assert.Equal(t, 2, guess)
@@ -37,6 +38,7 @@ func TestGuessIndex(t *testing.T) {
 func TestLookup(t *testing.T) {
 	// when
 	idx := &LearnedIndex{}
+	
 	// when
 	idx.Lookup(1.)
 }

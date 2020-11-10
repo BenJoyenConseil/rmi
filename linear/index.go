@@ -34,10 +34,13 @@ GuessIndex return the predicted position of the key in the index
 and upper / lower positions' search interval
 */
 func (idx *LearnedIndex) GuessIndex(key float64) (guess, lower, upper int) {
-	guess = int(math.Round(idx.m.Predict(key)*float64(idx.len) - 1))
+	cdfPred := idx.m.Predict(key)
+	scaleCDF := cdfPred*float64(idx.len) - 1
+	roundPosition := math.Round(scaleCDF)
+	guess = int(roundPosition)
 	lower = guess - idx.maxError
 	upper = guess + idx.maxError
-	return
+	return guess, lower, upper
 }
 
 func (idx *LearnedIndex) Lookup(key float64) (position int) {
