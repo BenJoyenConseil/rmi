@@ -31,6 +31,7 @@ It outputs :
 
 This is the plot showing the approximation (the linear regression), the cumulative distribution function for each value,
 and the current age's value (the Keys of the index) : 
+
 ![Fig 2 the LearnedIndex over people.csv](assets/plot.svg)
 
 ## features
