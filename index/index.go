@@ -12,6 +12,9 @@ type kv struct {
 	offset int
 }
 
+/*
+LearnedIndex is an index structure that use inference to locate keys
+*/
 type LearnedIndex struct {
 	m           *linear.RegressionModel
 	sortedTable []*kv
@@ -27,7 +30,7 @@ func (a ByKey) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a ByKey) Less(i, j int) bool { return a[i].key < a[j].key }
 
 /*
-New return an Index fitted and data
+New return an LearnedIndex fitted over the dataset with a linear regression algorythm
 */
 func New(dataset []float64) *LearnedIndex {
 	var sortedTable []*kv
@@ -52,6 +55,9 @@ func New(dataset []float64) *LearnedIndex {
 	return &LearnedIndex{m: m, len: len, maxError: maxErr, sortedTable: sortedTable}
 }
 
+/*
+scale return the CDF value x datasetLen -1 to get back the position in a sortedTable
+*/
 func scale(cdfVal float64, datasetLen int) float64 {
 	return cdfVal*float64(datasetLen) - 1
 }
@@ -79,7 +85,7 @@ func (idx *LearnedIndex) GuessIndex(key float64) (guess, lower, upper int) {
 }
 
 /*
-Lookup return the actual value or err if the key is not found in the index
+Lookup return the first offset of the key or err if the key is not found in the index
 */
 func (idx *LearnedIndex) Lookup(key float64) (offset int, err error) {
 	guess, lower, upper := idx.GuessIndex(key)

@@ -31,7 +31,7 @@ It outputs :
 
 ## features
 
-- [ ] A learned index structure using linear regression fitted on keys of type float
+- [x] A learned index structure using linear regression fitted on keys of type float
 - [ ] learning on integer
 - [ ] a two layer recursive index
 - [ ] a sort algorythm using learned structure
