@@ -29,6 +29,10 @@ It outputs :
     2020/11/11 15:52:43 Values to index: [90 23 3 45 1 1.5]
     2020/11/11 15:52:43 The value 45 is located line n°5 inside people.csv 
 
+This is the plot showing the approximation (the linear regression), the cumulative distribution function for each value,
+and the current age's value (the Keys of the index) : 
+![Fig 2 the LearnedIndex over people.csv](assets/plot.svg)
+
 ## features
 
 - [x] A learned index structure using linear regression fitted on keys of type float
