@@ -16,9 +16,9 @@ type kv struct {
 LearnedIndex is an index structure that use inference to locate keys
 */
 type LearnedIndex struct {
-	m           *linear.RegressionModel
+	M           *linear.RegressionModel
 	sortedTable []*kv
-	len         int
+	Len         int
 	maxError    int
 }
 
@@ -52,7 +52,7 @@ func New(dataset []float64) *LearnedIndex {
 		}
 
 	}
-	return &LearnedIndex{m: m, len: len, maxError: maxErr, sortedTable: sortedTable}
+	return &LearnedIndex{M: m, Len: len, maxError: maxErr, sortedTable: sortedTable}
 }
 
 /*
@@ -67,19 +67,19 @@ GuessIndex return the predicted position of the key in the index
 and upper / lower positions' search interval
 */
 func (idx *LearnedIndex) GuessIndex(key float64) (guess, lower, upper int) {
-	guess = int(math.Round(scale(idx.m.Predict(key), idx.len)))
+	guess = int(math.Round(scale(idx.M.Predict(key), idx.Len)))
 	if guess < 0 {
 		guess = 0
-	} else if guess > idx.len-1 {
-		guess = idx.len - 1
+	} else if guess > idx.Len-1 {
+		guess = idx.Len - 1
 	}
 	lower = guess - idx.maxError
 	if lower < 0 {
 		lower = 0
 	}
 	upper = guess + idx.maxError
-	if upper > idx.len-1 {
-		upper = idx.len - 1
+	if upper > idx.Len-1 {
+		upper = idx.Len - 1
 	}
 	return guess, lower, upper
 }
@@ -90,7 +90,7 @@ Lookup return the first offset of the key or err if the key is not found in the 
 func (idx *LearnedIndex) Lookup(key float64) (offset int, err error) {
 	guess, lower, upper := idx.GuessIndex(key)
 
-	if 0 <= guess && guess < idx.len {
+	if 0 <= guess && guess < idx.Len {
 		if idx.sortedTable[guess].key == key {
 			return idx.sortedTable[guess].offset, nil
 		} else if idx.sortedTable[guess].key < key {
