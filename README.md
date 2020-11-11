@@ -7,6 +7,27 @@ a Learned Index structure based on the [research work by Kraska & al.](https://a
 
 ![Fig 1 from the Case for Learned Index Structures](http://people.csail.mit.edu/ryanmarcus/rmi.png)
 
+## usage
+
+Create an index and make lookups
+
+    // load the age column and parse values into float64 values
+	  ageColumn := extractAgeColumn("data/people.csv")
+
+	  // create an index over the age column
+	  index := index.New(ageColumn)
+	  search, _ := strconv.ParseFloat(os.Args[1], 64)
+
+    // search an age and get back its line position inside the file people.csv
+    line, _ := index.Lookup(search)
+
+the `main.go` file contains an example of a learned index over`data/people.csv` age column. 
+
+It outputs : 
+
+    go run main.go 45
+    2020/11/11 15:52:43 Values to index: [90 23 3 45 1 1.5]
+    2020/11/11 15:52:43 The value 45 is located line n°5 inside people.csv 
 
 ## features
 
