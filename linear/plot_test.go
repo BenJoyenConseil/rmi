@@ -17,9 +17,9 @@ import (
 func TestExploration(t *testing.T) {
 	keys := []float64{5, 3, 3, 3.14, 10, 2.5, 2.98}
 	lenKeys := float64(len(keys))
-	m := &RegressionModel{intercept: 0.23119036646681634, slope: 0.08523040437506509}
+	m := &RegressionModel{Intercept: 0.23119036646681634, Slope: 0.08523040437506509}
 	linearRegFn := func(x float64) float64 { return m.Predict(x)*lenKeys - 1 }
-	x, y := cdf(keys)
+	x, y := Cdf(keys)
 	idxFromCDF := func(i float64) float64 { return stat.CDF(i, stat.Empirical, x, nil)*lenKeys - 1 }
 
 	p, _ := plot.New()

@@ -15,13 +15,13 @@ func TestFit(t *testing.T) {
 
 	// then
 	assert.NotNil(t, m)
-	assert.Equal(t, m.intercept, 0.23119036646681634)
-	assert.Equal(t, m.slope, 0.08523040437506509)
+	assert.Equal(t, m.Intercept, 0.23119036646681634)
+	assert.Equal(t, m.Slope, 0.08523040437506509)
 }
 
 func TestPredict(t *testing.T) {
 	// given
-	m := &RegressionModel{intercept: 0.23119036646681634, slope: 0.08523040437506509}
+	m := &RegressionModel{Intercept: 0.23119036646681634, Slope: 0.08523040437506509}
 
 	// when
 	p2dot5 := m.Predict(2.5)
@@ -39,7 +39,7 @@ func TestCDF(t *testing.T) {
 	keys := []float64{5, 3, 3, 3.14, 10, 2.5, 2.98}
 
 	// when
-	idx, y := cdf(keys)
+	idx, y := Cdf(keys)
 
 	// then
 	assert.Equal(t, idx[0], 2.5)
