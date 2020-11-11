@@ -11,15 +11,15 @@ a Learned Index structure based on the [research work by Kraska & al.](https://a
 
 Create an index and make lookups
 
-    // load the age column and parse values into float64 values
-	  ageColumn := extractAgeColumn("data/people.csv")
+	// load the age column and parse values into float64 values
+	ageColumn := extractAgeColumn("data/people.csv")
 
-	  // create an index over the age column
-	  index := index.New(ageColumn)
-	  search, _ := strconv.ParseFloat(os.Args[1], 64)
+	// create an index over the age column
+	index := index.New(ageColumn)
 
-    // search an age and get back its line position inside the file people.csv
-    line, _ := index.Lookup(search)
+	// search an age and get back its line position inside the file people.csv
+	search, _ := strconv.ParseFloat(os.Args[1], 64)
+	line, _ := index.Lookup(search)
 
 the `main.go` file contains an example of a learned index over`data/people.csv` age column. 
 
