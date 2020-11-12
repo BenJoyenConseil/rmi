@@ -14,9 +14,9 @@ func TestNew(t *testing.T) {
 	idx := New(keys)
 
 	// then
-	assert.Equal(t, 7, idx.len)
-	assert.Equal(t, .23119036646681634, idx.m.Intercept)
-	assert.Equal(t, .08523040437506509, idx.m.Slope)
+	assert.Equal(t, 7, idx.Len)
+	assert.Equal(t, .23119036646681634, idx.M.Intercept)
+	assert.Equal(t, .08523040437506509, idx.M.Slope)
 	assert.Equal(t, 2, idx.maxError)
 	// check the order
 	assert.Equal(t, &kv{key: 2.5, offset: 5}, idx.sortedTable[0])
@@ -30,8 +30,8 @@ func TestNew(t *testing.T) {
 
 func TestGuessIndex(t *testing.T) {
 	idx := &LearnedIndex{
-		m:        &linear.RegressionModel{Intercept: .23119036646681634, Slope: .08523040437506509},
-		len:      7,
+		M:        &linear.RegressionModel{Intercept: .23119036646681634, Slope: .08523040437506509},
+		Len:      7,
 		maxError: 2,
 	}
 
@@ -57,8 +57,8 @@ func TestGuessIndex(t *testing.T) {
 func TestLookup(t *testing.T) {
 	// given
 	idx := &LearnedIndex{
-		m:        &linear.RegressionModel{Intercept: .23119036646681634, Slope: .08523040437506509},
-		len:      7,
+		M:        &linear.RegressionModel{Intercept: .23119036646681634, Slope: .08523040437506509},
+		Len:      7,
 		maxError: 2,
 		//	keys : {5, 3, 3, 3.14, 10, 2.5, 2.98}
 		//  sort : {2.5, 2.98, 3, 3, 3.14, 5, 10}

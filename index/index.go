@@ -16,18 +16,12 @@ type kv struct {
 LearnedIndex is an index structure that use inference to locate keys
 */
 type LearnedIndex struct {
-	M           *linear.RegressionModel
-	sortedTable []*kv
-	Len         int
-	maxError    int
+	M            *linear.RegressionModel
+	rawdataTable []float64
+	sortedTable  []*kv
+	Len          int
+	maxError     int
 }
-
-// ByKey implements sort.Interface for []*kv
-type ByKey []*kv
-
-func (a ByKey) Len() int           { return len(a) }
-func (a ByKey) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a ByKey) Less(i, j int) bool { return a[i].key < a[j].key }
 
 /*
 New return an LearnedIndex fitted over the dataset with a linear regression algorythm
@@ -37,7 +31,7 @@ func New(dataset []float64) *LearnedIndex {
 	for i, row := range dataset {
 		sortedTable = append(sortedTable, &kv{key: row, offset: i})
 	}
-	sort.Sort(ByKey(sortedTable))
+	sort.SliceStable(sortedTable, func(i, j int) bool { return sortedTable[i].key < sortedTable[j].key })
 
 	x, y := linear.Cdf(dataset)
 	len := len(dataset)
