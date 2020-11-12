@@ -36,12 +36,16 @@ and the current age's value (the Keys of the index) :
 
 ## features
 
-- [x] A learned index structure using linear regression fitted on keys of type float
-- [ ] learning on integer
-- [ ] a two layer recursive index
-- [ ] a sort algorythm using learned structure
-- [ ] recursive indexes with topdown approarch
-- [ ] learning on string type
+- [x] A simple linear regression model learning the CDF of a float64 array
+- [x] A learned index structure fitted on keys of a collection
+- [x] Finding rows id on a CSV file
+- [ ] Use max + min error bounding elements to search quickly
+- [ ] Get all occurences of a key in a dataset
+- [ ] Learn on integer
+- [ ] A two layer recursive index
+- [ ] Index is persistent and durable (on hard drive)
+- [ ] A sort algorythm using learned structure
+- [ ] Learning on string type ?
 
 ## related works
 
