@@ -1,12 +1,24 @@
 package index
 
 import (
+	"fmt"
 	"rmi/linear"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
+func TestNewSortedTable(t *testing.T) {
+	// given
+	unsortedkeys := []float64{5, 3, 3, 3.14, 10, 2.5, 2.98}
+
+	// when
+	st := newSortedTable(unsortedkeys)
+
+	// then
+	assert.Equal(t, []float64{2.5, 2.98, 3, 3, 3.14, 5, 10}, st.keys)
+	assert.Equal(t, []int{5, 6, 1, 2, 3, 0, 4}, st.offsets)
+}
 func TestNew(t *testing.T) {
 	keys := []float64{5, 3, 3, 3.14, 10, 2.5, 2.98}
 
@@ -19,13 +31,8 @@ func TestNew(t *testing.T) {
 	assert.Equal(t, .08523040437506509, idx.M.Slope)
 	assert.Equal(t, 2, idx.maxError)
 	// check the order
-	assert.Equal(t, &kv{key: 2.5, offset: 5}, idx.sortedTable[0])
-	assert.Equal(t, &kv{key: 2.98, offset: 6}, idx.sortedTable[1])
-	assert.Equal(t, &kv{key: 3, offset: 1}, idx.sortedTable[2])
-	assert.Equal(t, &kv{key: 3, offset: 2}, idx.sortedTable[3])
-	assert.Equal(t, &kv{key: 3.14, offset: 3}, idx.sortedTable[4])
-	assert.Equal(t, &kv{key: 5, offset: 0}, idx.sortedTable[5])
-	assert.Equal(t, &kv{key: 10, offset: 4}, idx.sortedTable[6])
+	assert.Equal(t, []float64{2.5, 2.98, 3, 3, 3.14, 5, 10}, idx.ST.keys)
+	assert.Equal(t, []int{5, 6, 1, 2, 3, 0, 4}, idx.ST.offsets)
 }
 
 func TestGuessIndex(t *testing.T) {
@@ -63,89 +70,62 @@ func TestLookup(t *testing.T) {
 		//	keys : {5, 3, 3, 3.14, 10, 2.5, 2.98}
 		//  sort : {2.5, 2.98, 3, 3, 3.14, 5, 10}
 		//  posi : {0,   1,    2, 3, 4,    5, 6}
-		sortedTable: []*kv{
-			&kv{key: 2.5, offset: 5},
-			&kv{key: 2.98, offset: 6},
-			&kv{key: 3., offset: 1},
-			&kv{key: 3., offset: 2},
-			&kv{key: 3.14, offset: 3},
-			&kv{key: 5., offset: 0},
-			&kv{key: 10., offset: 4},
+		ST: &sortedTable{
+			keys:    []float64{2.5, 2.98, 3, 3, 3.14, 5, 10},
+			offsets: []int{5, 6, 1, 2, 3, 0, 4},
 		},
 	}
 
 	// when
-	offset, err := idx.Lookup(2.98)
+	offsets, err := idx.Lookup(2.5)
 	assert.Nil(t, err)
-	assert.Equal(t, 6, offset)
-
+	assert.ElementsMatch(t, []int{5}, offsets)
 	// when
-	offset, err = idx.Lookup(3.)
+	offsets, err = idx.Lookup(2.98)
 	assert.Nil(t, err)
-	assert.Equal(t, 1, offset)
-
+	assert.ElementsMatch(t, []int{6}, offsets)
 	// when
-	offset, err = idx.Lookup(3.14)
+	offsets, err = idx.Lookup(3.)
 	assert.Nil(t, err)
-	assert.Equal(t, 3, offset)
-
+	assert.ElementsMatch(t, []int{1, 2}, offsets)
 	// when
-	offset, err = idx.Lookup(10.)
+	offsets, err = idx.Lookup(3.14)
 	assert.Nil(t, err)
-	assert.Equal(t, 4, offset)
+	assert.ElementsMatch(t, []int{3}, offsets)
+	// when
+	offsets, err = idx.Lookup(5.)
+	assert.Nil(t, err)
+	assert.Equal(t, []int{0}, offsets)
+	// when
+	offsets, err = idx.Lookup(10.)
+	assert.Nil(t, err)
+	assert.Equal(t, []int{4}, offsets)
 
 	// when not in the index
-	offset, err = idx.Lookup(199.)
+	offsets, err = idx.Lookup(199.)
 	assert.NotNil(t, err)
-	assert.Equal(t, -1, offset)
+	assert.Nil(t, offsets)
 }
 
-func TestBinarySearch(t *testing.T) {
-	// given
-	kspace := []*kv{
-		&kv{key: 1, offset: 0},
-		&kv{key: 1, offset: 1},
-		&kv{key: 1, offset: 2},
-		&kv{key: 3, offset: 3},
-		&kv{key: 3.14, offset: 4},
-		&kv{key: 5, offset: 123},
-		&kv{key: 5, offset: 124},
-		&kv{key: 7.544, offset: 125},
-		&kv{key: 7.544, offset: 126},
-		&kv{key: 7.599, offset: 127},
+func ExampleLearnedIndex() {
+	keys := []float64{5, 3, 3, 3.14, 10, 2.5, 2.98}
+
+	index := New(keys)
+
+	for _, k := range keys {
+		offset, err := index.Lookup(k)
+		if err != nil {
+			fmt.Printf("Error: %s\n", err)
+		}
+		fmt.Printf("The key %f is located %d\n", k, offset)
 	}
 
-	// when
-	offset, err := binarySearch(1, kspace)
-	assert.Contains(t, []int{0, 1, 2}, offset)
-	assert.Nil(t, err)
-
-	// when
-	offset, err = binarySearch(3, kspace)
-	assert.Equal(t, 3, offset)
-	assert.Nil(t, err)
-
-	// when
-	offset, err = binarySearch(3.14, kspace)
-	assert.Equal(t, 4, offset)
-	assert.Nil(t, err)
-
-	// when
-	offset, err = binarySearch(5, kspace)
-	assert.Contains(t, []int{123, 124}, offset)
-	assert.Nil(t, err)
-
-	// when
-	offset, err = binarySearch(7.544, kspace)
-	assert.Equal(t, 125, offset)
-	assert.Nil(t, err)
-
-	// when
-	offset, err = binarySearch(7.599, kspace)
-	assert.Equal(t, 127, offset)
-	assert.Nil(t, err)
-
-	// when not found
-	offset, err = binarySearch(14, kspace)
-	assert.NotNil(t, err)
+	// Output:
+	// The key 2.500000 is located [5]
+	// The key 2.980000 is located [6]
+	// The key 3.000000 is located [1 2]
+	// The key 3.000000 is located [1 2]
+	// The key 3.140000 is located [3]
+	// The key 5.000000 is located [0]
+	// The key 10.000000 is located [4]
 }

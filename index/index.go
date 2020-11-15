@@ -12,28 +12,50 @@ type kv struct {
 	offset int
 }
 
+type sortedTable struct {
+	keys    []float64
+	offsets []int
+}
+
+// Implement the Sort interface
+type byKeys struct{ *sortedTable }
+
+func (st byKeys) Len() int { return len(st.keys) }
+func (st byKeys) Swap(i, j int) {
+	st.keys[i], st.keys[j] = st.keys[j], st.keys[i]
+	st.offsets[i], st.offsets[j] = st.offsets[j], st.offsets[i]
+}
+func (st byKeys) Less(i, j int) bool { return st.keys[i] < st.keys[j] }
+
+func newSortedTable(x []float64) *sortedTable {
+	keys, offsets := x, make([]int, len(x))
+	for i := range x {
+		offsets[i] = i
+	}
+	st := &sortedTable{keys: keys, offsets: offsets}
+	sort.Sort(byKeys{st})
+	return st
+}
+
 /*
 LearnedIndex is an index structure that use inference to locate keys
 */
 type LearnedIndex struct {
-	M            *linear.RegressionModel
-	rawdataTable []float64
-	sortedTable  []*kv
-	Len          int
-	maxError     int
+	M           *linear.RegressionModel
+	ST          *sortedTable
+	sortedTable []*kv
+	Len         int
+	maxError    int
 }
 
 /*
 New return an LearnedIndex fitted over the dataset with a linear regression algorythm
 */
 func New(dataset []float64) *LearnedIndex {
-	var sortedTable []*kv
-	for i, row := range dataset {
-		sortedTable = append(sortedTable, &kv{key: row, offset: i})
-	}
-	sort.SliceStable(sortedTable, func(i, j int) bool { return sortedTable[i].key < sortedTable[j].key })
 
-	x, y := linear.Cdf(dataset)
+	st := newSortedTable(dataset)
+
+	x, y := linear.Cdf(st.keys)
 	len := len(dataset)
 	m := linear.Fit(x, y)
 	maxErr := 0
@@ -46,7 +68,7 @@ func New(dataset []float64) *LearnedIndex {
 		}
 
 	}
-	return &LearnedIndex{M: m, Len: len, maxError: maxErr, sortedTable: sortedTable}
+	return &LearnedIndex{M: m, Len: len, maxError: maxErr, ST: st}
 }
 
 /*
@@ -58,7 +80,8 @@ func scale(cdfVal float64, datasetLen int) float64 {
 
 /*
 GuessIndex return the predicted position of the key in the index
-and upper / lower positions' search interval
+and upper / lower positions' search interval. Guess, lower and upper
+always have values between 0 and len(keys)-1
 */
 func (idx *LearnedIndex) GuessIndex(key float64) (guess, lower, upper int) {
 	guess = int(math.Round(scale(idx.M.Predict(key), idx.Len)))
@@ -79,42 +102,34 @@ func (idx *LearnedIndex) GuessIndex(key float64) (guess, lower, upper int) {
 }
 
 /*
-Lookup return the first offset of the key or err if the key is not found in the index
+Lookup return the first offsets of the key or err if the key is not found in the index
 */
-func (idx *LearnedIndex) Lookup(key float64) (offset int, err error) {
+func (idx *LearnedIndex) Lookup(key float64) (offsets []int, err error) {
 	guess, lower, upper := idx.GuessIndex(key)
+	i := 0
 
-	if 0 <= guess && guess < idx.Len {
-		if idx.sortedTable[guess].key == key {
-			return idx.sortedTable[guess].offset, nil
-		} else if idx.sortedTable[guess].key < key {
-			return binarySearch(key, idx.sortedTable[guess+1:upper+1])
+	if idx.ST.keys[guess] == key {
+		i = guess
+	} else if idx.ST.keys[guess] < key {
+		subKeys := idx.ST.keys[guess+1 : upper+1]
+		i = sort.SearchFloat64s(subKeys, key) + guess + 1
+	} else {
+		subKeys := idx.ST.keys[lower:guess]
+		i = sort.SearchFloat64s(subKeys, key) + lower
+	}
+
+	// iterate to get all equal keys
+	for i := i; i < len(idx.ST.keys); i++ {
+		if idx.ST.keys[i] == key {
+			offsets = append(offsets, idx.ST.offsets[i])
 		} else {
-			return binarySearch(key, idx.sortedTable[lower:guess])
+			break
 		}
 	}
 
-	return -1, fmt.Errorf("The following key <%f> is not found in the index", key)
-}
-
-/*
-binarySearch implementation is for finding the leftmost element
-*/
-func binarySearch(key float64, searchSpace []*kv) (offeset int, err error) {
-	L := 0
-	R := len(searchSpace) - 1
-	nIter := 0
-
-	for L <= R {
-		m := int(math.Floor(float64((L + R) / 2)))
-		if searchSpace[m].key < key {
-			L = m + 1
-		} else if searchSpace[m].key > key {
-			R = m - 1
-		} else {
-			return searchSpace[m].offset, nil
-		}
-		nIter++
+	if len(offsets) == 0 {
+		err = fmt.Errorf("The following key <%f> is not found in the index", key)
 	}
-	return -1, fmt.Errorf("The following key <%f> is not found in the index", key)
+
+	return offsets, err
 }
