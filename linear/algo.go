@@ -1,6 +1,7 @@
 package linear
 
 import (
+	"math"
 	"sort"
 
 	"gonum.org/v1/gonum/stat"
@@ -19,6 +20,10 @@ of a LinearRegression applied on x. Y is the CDF value
 */
 func Fit(x, y []float64) *RegressionModel {
 	alpha, beta := stat.LinearRegression(x, y, nil, false)
+	if math.IsNaN(alpha) || math.IsNaN(beta) {
+		alpha = stat.Mean(y, nil)
+		beta = 0
+	}
 	return &RegressionModel{Intercept: alpha, Slope: beta}
 }
 

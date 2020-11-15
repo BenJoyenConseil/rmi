@@ -39,6 +39,7 @@ and the current age's value (the Keys of the index) :
 - [x] A simple linear regression model learning the CDF of a float64 array
 - [x] A learned index structure fitted on keys of a collection
 - [x] Finding rows id on a CSV file
+- [ ] Return a list of lines matching the key
 - [ ] Use max + min error bounding elements to search quickly
 - [ ] Get all occurences of a key in a dataset
 - [ ] Learn on integer
