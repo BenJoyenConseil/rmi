@@ -17,7 +17,7 @@ func main() {
 	if len(os.Args) <= 1 {
 		log.Fatal("Usage: main.go <search_age>")
 	}
-	file := "data/titanic.csv"
+	file := "data/people.csv"
 	// load the age column and parse values into float64 values
 	ageColumn := extractColumn(file, "age")
 
@@ -35,8 +35,10 @@ func main() {
 		lines = append(lines, l+FIRST_LINE_OF_DATA)
 	}
 	log.Printf("People who are %s years old are located at %d inside %s \n", os.Args[1], lines, file)
-	png, _ := filepath.Abs("assets/plot.svg")
+	png, _ := filepath.Abs("assets/plot.png")
+	svg, _ := filepath.Abs("assets/plot.svg")
 	index.Genplot(idx, ageColumn, png)
+	index.Genplot(idx, ageColumn, svg)
 }
 
 func extractColumn(file string, colName string) []float64 {
