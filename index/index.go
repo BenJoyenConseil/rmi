@@ -2,8 +2,9 @@ package index
 
 import (
 	"fmt"
-	"rmi/linear"
 	"sort"
+
+	"github.com/BenJoyenConseil/rmi/linear"
 )
 
 type sortedTable struct {

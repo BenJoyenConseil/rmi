@@ -6,9 +6,10 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"rmi/index"
 	"strconv"
 	"strings"
+
+	"github.com/BenJoyenConseil/rmi/index"
 )
 
 const FIRST_LINE_OF_DATA int = 2

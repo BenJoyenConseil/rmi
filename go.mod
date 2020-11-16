@@ -1,4 +1,4 @@
-module rmi
+module github.com/BenJoyenConseil/rmi
 
 go 1.15
 

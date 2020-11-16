@@ -8,11 +8,12 @@ import (
 	"math"
 	"math/rand"
 	"os"
-	"rmi/linear"
 	"sort"
 	"strconv"
 	"strings"
 	"testing"
+
+	"github.com/BenJoyenConseil/rmi/linear"
 
 	"github.com/stretchr/testify/assert"
 )

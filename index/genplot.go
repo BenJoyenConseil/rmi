@@ -3,7 +3,8 @@ package index
 import (
 	"image/color"
 	"math"
-	"rmi/linear"
+
+	"github.com/BenJoyenConseil/rmi/linear"
 
 	"gonum.org/v1/gonum/floats"
 
