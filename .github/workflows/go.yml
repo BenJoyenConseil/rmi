@@ -34,3 +34,6 @@ jobs:
 
     - name: Test
       run: go test -v ./...
+
+    - name: Benchmarks
+      run: go test -v -bench Bench* -run=^$ ./...
