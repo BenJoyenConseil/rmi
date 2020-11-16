@@ -1,6 +1,7 @@
 package linear
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -34,17 +35,18 @@ func TestFit_WhenAlphaBetaAreNaN_ShouldReturnMean(t *testing.T) {
 
 func TestPredict(t *testing.T) {
 	// given
-	m := &RegressionModel{Intercept: 0.23119036646681634, Slope: 0.08523040437506509}
+	alpha, beta := 0.23119036646681634, 0.08523040437506509
+	m := &RegressionModel{Intercept: alpha, Slope: beta}
 
 	// when
-	p2dot5 := m.Predict(2.5)
+	p := m.Predict(2.5)
+	assert.Equal(t, alpha+2.5*beta, p)
+	// when
 	p3 := m.Predict(3)
+	assert.Equal(t, alpha+3.*beta, p3)
+	// when
 	p5 := m.Predict(5.)
-
-	// then
-	assert.Equal(t, .44426637740447905, p2dot5)
-	assert.Equal(t, .4868815795920116, p3)
-	assert.Equal(t, .6573423883421418, p5)
+	assert.Equal(t, alpha+5.*beta, p5)
 }
 
 func TestCDF(t *testing.T) {
@@ -72,4 +74,21 @@ func TestCDF(t *testing.T) {
 	assert.Equal(t, y[6], 1.0)
 
 	assert.Equal(t, (y[0]*float64(len(idx)))-1.0, 0.0)
+}
+
+func ExampleCdf() {
+
+	sortedX := []float64{2.5, 2.98, 3, 3, 3.14, 5, 10}
+	x, y := Cdf(sortedX)
+	for i := range x {
+		fmt.Println("x:", x[i], "y:", y[i])
+	}
+	// Output:
+	// x: 2.5 y: 0.14285714285714285
+	// x: 2.98 y: 0.2857142857142857
+	// x: 3 y: 0.5714285714285714
+	// x: 3 y: 0.5714285714285714
+	// x: 3.14 y: 0.7142857142857143
+	// x: 5 y: 0.8571428571428571
+	// x: 10 y: 1
 }

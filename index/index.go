@@ -2,15 +2,9 @@ package index
 
 import (
 	"fmt"
-	"math"
 	"rmi/linear"
 	"sort"
 )
-
-type kv struct {
-	key    float64
-	offset int
-}
 
 type sortedTable struct {
 	keys    []float64
@@ -41,11 +35,10 @@ func newSortedTable(x []float64) *sortedTable {
 LearnedIndex is an index structure that use inference to locate keys
 */
 type LearnedIndex struct {
-	M           *linear.RegressionModel
-	ST          *sortedTable
-	sortedTable []*kv
-	Len         int
-	maxError    int
+	M                        *linear.RegressionModel
+	ST                       *sortedTable
+	Len                      int
+	MinErrBound, MaxErrBound int
 }
 
 /*
@@ -56,26 +49,16 @@ func New(dataset []float64) *LearnedIndex {
 	st := newSortedTable(dataset)
 
 	x, y := linear.Cdf(st.keys)
-	len := len(dataset)
+	len_ := len(dataset)
 	m := linear.Fit(x, y)
-	maxErr := 0
+	guesses := make([]int, len_)
+	scaledY := make([]int, len_)
 	for i, k := range x {
-		guessPosition := math.Round(scale(m.Predict(k), len))
-		truePosition := math.Round(scale(y[i], len))
-		residual := math.Sqrt(math.Pow(truePosition-guessPosition, 2))
-		if float64(maxErr) < residual {
-			maxErr = int(residual)
-		}
-
+		guesses[i] = scale(m.Predict(k), len_)
+		scaledY[i] = scale(y[i], len_)
 	}
-	return &LearnedIndex{M: m, Len: len, maxError: maxErr, ST: st}
-}
-
-/*
-scale return the CDF value x datasetLen -1 to get back the position in a sortedTable
-*/
-func scale(cdfVal float64, datasetLen int) float64 {
-	return cdfVal*float64(datasetLen) - 1
+	minErrBound, maxErrBound := residual(guesses, scaledY)
+	return &LearnedIndex{M: m, Len: len_, ST: st, MinErrBound: minErrBound, MaxErrBound: maxErrBound}
 }
 
 /*
@@ -84,17 +67,17 @@ and upper / lower positions' search interval. Guess, lower and upper
 always have values between 0 and len(keys)-1
 */
 func (idx *LearnedIndex) GuessIndex(key float64) (guess, lower, upper int) {
-	guess = int(math.Round(scale(idx.M.Predict(key), idx.Len)))
+	guess = scale(idx.M.Predict(key), idx.Len)
 	if guess < 0 {
 		guess = 0
 	} else if guess > idx.Len-1 {
 		guess = idx.Len - 1
 	}
-	lower = guess - idx.maxError
+	lower = idx.MinErrBound + guess
 	if lower < 0 {
 		lower = 0
 	}
-	upper = guess + idx.maxError
+	upper = guess + idx.MaxErrBound
 	if upper > idx.Len-1 {
 		upper = idx.Len - 1
 	}

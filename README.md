@@ -49,10 +49,13 @@ and the current age's value (the Keys of the index) :
 - [x] A learned index structure fitted on keys of a collection
 - [x] Finding rows id on a CSV file
 - [x] Return a list of lines matching the key
-- [ ] Use max + min error bounding elements to search quickly
-- [ ] Get all occurences of a key in a dataset
-- [ ] Learn on integer
+- [x] Use max + min error bounding elements to search quickly
+- [x] Benchmarks InMemory LearnedIndex against InMem BinarySearch
+- [ ] Store offset lines and a primary key index
+- [ ] Store the sortedTable
+- [ ] Benchmarks Learned against BinarySearchTree
 - [ ] A two layer recursive index
+- [ ] Learn on integer
 - [ ] Index is persistent and durable (on hard drive)
 - [ ] A sort algorythm using learned structure
 - [ ] Learning on string type ?

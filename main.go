@@ -24,6 +24,7 @@ func main() {
 	// create an index over the age column
 	idx := index.New(ageColumn)
 	search, _ := strconv.ParseFloat(os.Args[1], 64)
+	log.Println("max error is :", idx.MaxErrBound, "; min error is", idx.MinErrBound)
 
 	// search an age and get back its line position inside the file people.csv
 	result, err := idx.Lookup(search)
@@ -34,6 +35,7 @@ func main() {
 	for _, l := range result {
 		lines = append(lines, l+FIRST_LINE_OF_DATA)
 	}
+	log.Printf("We found %d entries in the index \n", len(lines))
 	log.Printf("People who are %s years old are located at %d inside %s \n", os.Args[1], lines, file)
 	png, _ := filepath.Abs("assets/plot.png")
 	svg, _ := filepath.Abs("assets/plot.svg")
