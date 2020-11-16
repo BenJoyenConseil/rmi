@@ -1,6 +1,7 @@
 RMI
 ===
 ![Go](https://github.com/BenJoyenConseil/learned_index/workflows/Go/badge.svg)
+[![PkgGoDev](https://pkg.go.dev/badge/github.com/BenJoyenConseil/rmi)](https://pkg.go.dev/github.com/BenJoyenConseil/rmi)
 
 A goland implementation of a RMI ([Recursive Model Indexes](https://github.com/learnedsystems/RMI)), 
 a Learned Index structure based on the [research work by Kraska & al.](https://arxiv.org/abs/1712.01208) 
