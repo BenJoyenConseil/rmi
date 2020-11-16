@@ -1,4 +1,4 @@
-module rmi
+module learned_index
 
 go 1.15
 
