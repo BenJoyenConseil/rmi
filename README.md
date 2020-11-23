@@ -1,6 +1,6 @@
 RMI
 ===
-![Go](https://github.com/BenJoyenConseil/learned_index/workflows/Go/badge.svg)
+![Go](https://github.com/BenJoyenConseil/rmi/workflows/Go/badge.svg)
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/BenJoyenConseil/rmi)](https://pkg.go.dev/github.com/BenJoyenConseil/rmi)
 
 A goland implementation of a RMI ([Recursive Model Indexes](https://github.com/learnedsystems/RMI)), 
@@ -56,6 +56,7 @@ and the current age's value (the Keys of the index) :
 - [ ] Store the sortedTable
 - [ ] Benchmarks Learned against BinarySearchTree
 - [ ] A two layer recursive index
+- [ ] CLI to create indexes over CSV
 - [ ] Learn on integer
 - [ ] Index is persistent and durable (on hard drive)
 - [ ] A sort algorythm using learned structure

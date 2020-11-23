@@ -42,8 +42,8 @@ func main() {
 	// generate plot images and save them
 	png, _ := filepath.Abs("assets/plot.png")
 	svg, _ := filepath.Abs("assets/plot.svg")
-	index.Genplot(idx, ageColumn, png)
-	index.Genplot(idx, ageColumn, svg)
+	index.Genplot(idx, ageColumn, png, false)
+	index.Genplot(idx, ageColumn, svg, true)
 }
 
 func extractColumn(file string, colName string) []float64 {
