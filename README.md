@@ -1,6 +1,7 @@
 RMI
 ===
 ![Go](https://github.com/BenJoyenConseil/learned_index/workflows/Go/badge.svg)
+[![PkgGoDev](https://pkg.go.dev/badge/github.com/BenJoyenConseil/rmi)](https://pkg.go.dev/github.com/BenJoyenConseil/rmi)
 
 A goland implementation of a RMI ([Recursive Model Indexes](https://github.com/learnedsystems/RMI)), 
 a Learned Index structure based on the [research work by Kraska & al.](https://arxiv.org/abs/1712.01208) 
@@ -35,7 +36,7 @@ It outputs :
 	Martine,1.5,F
 	Georgette,23,F
 
-    $ go run main.go 45
+    $ go run main.go 23
 	2020/11/15 20:29:56 People who are 23 years old are located at [8 3] inside data/people.csv 
 
 This is the plot showing the approximation (the linear regression), the cumulative distribution function for each value,
