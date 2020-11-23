@@ -28,12 +28,13 @@ jobs:
             curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
             dep ensure
         fi
+        sudo apt-get install make
 
     - name: Build
-      run: go build -v ./...
+      run: make build
 
     - name: Test
-      run: go test -v ./...
+      run: make test
 
     - name: Benchmarks
-      run: go test -v -bench Bench* -run=^$ ./...
+      run: make bench

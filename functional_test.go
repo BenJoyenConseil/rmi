@@ -39,7 +39,7 @@ var min, max = 0., 100.
 var random = func() float64 { return math.Round(min + rand.Float64()*(max-min)) }
 
 func BenchmarkLearnedIndex(b *testing.B) {
-	file := "../data/titanic.csv"
+	file := "./data/titanic.csv"
 	// load the age column and parse values into float64 values
 	ageColumn := extractColumn(file, "age")
 
@@ -62,7 +62,7 @@ func BenchmarkLearnedIndex(b *testing.B) {
 }
 
 func BenchmarkBinarySearch(b *testing.B) {
-	file := "../data/titanic.csv"
+	file := "./data/titanic.csv"
 	// load the age column and parse values into float64 values
 	ageColumn := extractColumn(file, "age")
 	sort.Float64s(ageColumn)
@@ -85,28 +85,6 @@ func BenchmarkBinarySearch(b *testing.B) {
 				offsets = append(offsets, o)
 				o++
 			}
-			keyFound[k] = offsets
-		}
-	}
-	log.Println("keys found:", len(keyFound), "| keys not found:", len(keyNotFound))
-	//log.Println(keyNotFound)
-}
-func BenchmarkLearnedIndexCubic(b *testing.B) {
-	file := "../data/titanic.csv"
-	// load the age column and parse values into float64 values
-	ageColumn := extractColumn(file, "age")
-
-	// create an index over the age column
-	idx := index.NewCubic(ageColumn)
-	keyFound := map[float64][]int{}
-	keyNotFound := map[float64][]error{}
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		k := random()
-		offsets, err := idx.Lookup(k)
-		if err != nil {
-			keyNotFound[k] = append(keyNotFound[k], err)
-		} else {
 			keyFound[k] = offsets
 		}
 	}
