@@ -1,16 +1,7 @@
 package index
 
 import (
-	"encoding/csv"
 	"fmt"
-	"io"
-	"log"
-	"math"
-	"math/rand"
-	"os"
-	"sort"
-	"strconv"
-	"strings"
 	"testing"
 
 	"github.com/BenJoyenConseil/rmi/linear"
@@ -23,11 +14,11 @@ func TestNewSortedTable(t *testing.T) {
 	unsortedkeys := []float64{5, 3, 3, 3.14, 10, 2.5, 2.98}
 
 	// when
-	st := newSortedTable(unsortedkeys)
+	st := NewSortedTable(unsortedkeys)
 
 	// then
-	assert.Equal(t, []float64{2.5, 2.98, 3, 3, 3.14, 5, 10}, st.keys)
-	assert.Equal(t, []int{5, 6, 1, 2, 3, 0, 4}, st.offsets)
+	assert.Equal(t, []float64{2.5, 2.98, 3, 3, 3.14, 5, 10}, st.Keys)
+	assert.Equal(t, []int{5, 6, 1, 2, 3, 0, 4}, st.Offsets)
 }
 func TestNew(t *testing.T) {
 	keys := []float64{5, 3, 3, 3.14, 10, 2.5, 2.98}
@@ -37,13 +28,12 @@ func TestNew(t *testing.T) {
 
 	// then
 	assert.Equal(t, 7, idx.Len)
-	assert.Equal(t, .23119036646681634, idx.M.Intercept)
-	assert.Equal(t, .08523040437506509, idx.M.Slope)
+	assert.IsType(t, &linear.RegressionModel{}, idx.M)
 	assert.Equal(t, 2, idx.MaxErrBound)
 	assert.Equal(t, -2, idx.MinErrBound)
 	// check the order
-	assert.Equal(t, []float64{2.5, 2.98, 3, 3, 3.14, 5, 10}, idx.ST.keys)
-	assert.Equal(t, []int{5, 6, 1, 2, 3, 0, 4}, idx.ST.offsets)
+	assert.Equal(t, []float64{2.5, 2.98, 3, 3, 3.14, 5, 10}, idx.ST.Keys)
+	assert.Equal(t, []int{5, 6, 1, 2, 3, 0, 4}, idx.ST.Offsets)
 }
 
 func TestGuessIndex(t *testing.T) {
@@ -55,21 +45,21 @@ func TestGuessIndex(t *testing.T) {
 	}
 
 	// when
-	guess, lower, upper := idx.GuessIndex(2.95)
-	assert.Equal(t, 2, guess)
-	assert.Equal(t, 0, lower)
-	assert.Equal(t, 4, upper)
+	guess, lower, upper := idx.GuessIndex(5)
+	assert.Equal(t, 1, lower)
+	assert.Equal(t, 4, guess)
+	assert.Equal(t, 6, upper)
 
-	// when guess < 0 ==> -1
-	guess, lower, upper = idx.GuessIndex(-2.95)
+	// when upper < 0 ==> 0
+	guess, lower, upper = idx.GuessIndex(-10)
+	assert.Equal(t, 0, lower)
 	assert.Equal(t, 0, guess)
-	assert.Equal(t, 0, lower)
-	assert.Equal(t, 2, upper)
+	assert.Equal(t, 0, upper)
 
-	// when guess > len-1 ==> 7
+	// when guess > len-1 ==> 6
 	guess, lower, upper = idx.GuessIndex(10.)
+	assert.Equal(t, 4, lower)
 	assert.Equal(t, 6, guess)
-	assert.Equal(t, 3, lower)
 	assert.Equal(t, 6, upper)
 }
 
@@ -84,8 +74,8 @@ func TestLookup(t *testing.T) {
 		//  sort : {2.5, 2.98, 3, 3, 3.14, 5, 10}
 		//  posi : {0,   1,    2, 3, 4,    5, 6}
 		ST: &sortedTable{
-			keys:    []float64{2.5, 2.98, 3, 3, 3.14, 5, 10},
-			offsets: []int{5, 6, 1, 2, 3, 0, 4},
+			Keys:    []float64{2.5, 2.98, 3, 3, 3.14, 5, 10},
+			Offsets: []int{5, 6, 1, 2, 3, 0, 4},
 		},
 	}
 
@@ -141,92 +131,4 @@ func ExampleLearnedIndex() {
 	// The key 3.140000 is located [3]
 	// The key 5.000000 is located [0]
 	// The key 10.000000 is located [4]
-}
-
-var min, max = 0., 100.
-var random = func() float64 { return math.Round(min + rand.Float64()*(max-min)) }
-
-func BenchmarkLearnedIndex(b *testing.B) {
-	file := "../data/titanic.csv"
-	// load the age column and parse values into float64 values
-	ageColumn := extractColumn(file, "age")
-
-	// create an index over the age column
-	idx := New(ageColumn)
-	keyFound := map[float64][]int{}
-	keyNotFound := map[float64][]error{}
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		k := random()
-		offsets, err := idx.Lookup(k)
-		if err != nil {
-			keyNotFound[k] = append(keyNotFound[k], err)
-		} else {
-			keyFound[k] = offsets
-		}
-	}
-	log.Println("keys found:", len(keyFound), "| keys not found:", len(keyNotFound))
-	//log.Println(keyNotFound)
-}
-
-func BenchmarkBinarySearch(b *testing.B) {
-	file := "../data/titanic.csv"
-	// load the age column and parse values into float64 values
-	ageColumn := extractColumn(file, "age")
-	sort.Float64s(ageColumn)
-	keyFound := map[float64][]int{}
-	keyNotFound := map[float64][]error{}
-	b.ResetTimer()
-	o := 0
-	for i := 0; i < b.N; i++ {
-		k := random()
-		o = sort.SearchFloat64s(ageColumn, k)
-
-		if o >= len(ageColumn) {
-			keyNotFound[k] = append(keyNotFound[k], fmt.Errorf("%f not found", k))
-		} else {
-			offsets := []int{}
-			for o < len(ageColumn) {
-				if ageColumn[o] != k {
-					break
-				}
-				offsets = append(offsets, o)
-				o++
-			}
-			keyFound[k] = offsets
-		}
-	}
-	log.Println("keys found:", len(keyFound), "| keys not found:", len(keyNotFound))
-	//log.Println(keyNotFound)
-}
-
-func extractColumn(file string, colName string) []float64 {
-	csvfile, _ := os.Open(file)
-	r := csv.NewReader(csvfile)
-
-	var valuesColumn []float64
-	var ageCid int
-	var headerLine bool = true
-	for {
-		// Read each record from csv
-		record, err := r.Read()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			log.Fatal(err)
-		}
-		if headerLine {
-			for i, c := range record {
-				if strings.ToLower(c) == colName {
-					ageCid = i
-				}
-			}
-			headerLine = false
-			continue
-		}
-		v, _ := strconv.ParseFloat(record[ageCid], 64)
-		valuesColumn = append(valuesColumn, v)
-	}
-	return valuesColumn
 }

@@ -2,17 +2,8 @@ package index
 
 import "math"
 
-func residual(guesses, y []int) (min, max int) {
-	for i := range guesses {
-		residual := y[i] - guesses[i]
-		if residual < min {
-			min = residual
-		}
-		if residual > max {
-			max = residual
-		}
-	}
-	return min, max
+func residual(guess, y int) (residual int) {
+	return y - guess
 }
 
 /*
