@@ -51,7 +51,7 @@ func TestPredict(t *testing.T) {
 
 func TestCDF(t *testing.T) {
 	// given
-	keys := []float64{5, 3, 3, 3.14, 10, 2.5, 2.98}
+	keys := []float64{2.5, 2.98, 3, 3, 3.14, 5, 10}
 
 	// when
 	idx, y := Cdf(keys)

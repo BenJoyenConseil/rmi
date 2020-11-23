@@ -2,7 +2,6 @@ package linear
 
 import (
 	"math"
-	"sort"
 
 	"gonum.org/v1/gonum/stat"
 )
@@ -40,9 +39,6 @@ Return the x array sorted and the y array containing
 empirical CDF value foreach x's value. len(x)=len(y)
 */
 func Cdf(x []float64) (sortedX, y []float64) {
-	if !sort.Float64sAreSorted(x) {
-		sort.Float64s(x)
-	}
 	for _, i := range x {
 		yi := stat.CDF(i, stat.Empirical, x, nil)
 		y = append(y, yi)
