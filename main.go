@@ -38,6 +38,8 @@ func main() {
 	}
 	log.Printf("We found %d entries in the index \n", len(lines))
 	log.Printf("People who are %s years old are located at %d inside %s \n", os.Args[1], lines, file)
+
+	// generate plot images and save them
 	png, _ := filepath.Abs("assets/plot.png")
 	svg, _ := filepath.Abs("assets/plot.svg")
 	index.Genplot(idx, ageColumn, png)

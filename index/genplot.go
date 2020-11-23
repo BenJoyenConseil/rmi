@@ -2,9 +2,6 @@ package index
 
 import (
 	"image/color"
-	"math"
-
-	"github.com/BenJoyenConseil/rmi/linear"
 
 	"gonum.org/v1/gonum/floats"
 
@@ -20,8 +17,7 @@ Genplot takes an index and plots its keys, CDF, its approximation, and writes a 
 */
 func Genplot(index *LearnedIndex, indexedCol []float64, plotfilepath string) {
 	linearRegFn := func(x float64) float64 { return index.M.Predict(x)*float64(index.Len) - 1 }
-	x, _ := linear.Cdf(indexedCol)
-	idxFromCDF := func(i float64) float64 { return stat.CDF(i, stat.Empirical, x, nil)*float64(index.Len) - 1 }
+	idxFromCDF := func(i float64) float64 { return stat.CDF(i, stat.Empirical, index.ST.Keys, nil)*float64(index.Len) - 1 }
 
 	p, _ := plot.New()
 	p.Title.Text = "Learned Index RMI"
@@ -29,16 +25,26 @@ func Genplot(index *LearnedIndex, indexedCol []float64, plotfilepath string) {
 	p.Y.Label.Text = "Index"
 
 	courbeKeys := plotter.XYs{}
-	courbePreds := plotter.XYs{}
-	for i, k := range x {
+	for i, k := range index.ST.Keys {
 		courbeKeys = append(courbeKeys, plotter.XY{X: k, Y: float64(i)})
-		pred := math.Round(index.M.Predict(k)*float64(index.Len) - 1)
-		courbePreds = append(courbePreds, plotter.XY{X: k, Y: pred})
 	}
 	approxFn := plotter.NewFunction(linearRegFn)
 	approxFn.Dashes = []vg.Length{vg.Points(2), vg.Points(2)}
 	approxFn.Width = vg.Points(2)
 	approxFn.Color = color.RGBA{G: 255, A: 255}
+
+	maxErrFn := plotter.NewFunction(func(x float64) float64 { _, _, upper := index.GuessIndex(x); return float64(upper) })
+	maxErrFn.Dashes = []vg.Length{vg.Points(4), vg.Points(5)}
+	maxErrFn.Width = vg.Points(1)
+	maxErrFn.Color = plotutil.SoftColors[2]
+	p.Add(maxErrFn)
+	p.Legend.Add("upper bound", maxErrFn)
+	minErrFn := plotter.NewFunction(func(x float64) float64 { _, lower, _ := index.GuessIndex(x); return float64(lower) })
+	minErrFn.Dashes = []vg.Length{vg.Points(4), vg.Points(5)}
+	minErrFn.Width = vg.Points(1)
+	minErrFn.Color = plotutil.SoftColors[4]
+	p.Add(minErrFn)
+	p.Legend.Add("lower bound", minErrFn)
 
 	cdfFn := plotter.NewFunction(idxFromCDF)
 	cdfFn.Width = vg.Points(1)
@@ -50,8 +56,9 @@ func Genplot(index *LearnedIndex, indexedCol []float64, plotfilepath string) {
 	p.Add(cdfFn)
 	p.Legend.Add("CDF", cdfFn)
 	p.X.Min = 0
-	p.X.Max = floats.Max(index.ST.keys)
-	p.Y.Min = 0
+	p.X.Max = floats.Max(index.ST.Keys)
+	p.Y.Min = -float64(index.Len) / 10
 	p.Y.Max = float64(index.Len)
+	p.Add(plotter.NewGrid())
 	p.Save(4*vg.Inch, 4*vg.Inch, plotfilepath)
 }
