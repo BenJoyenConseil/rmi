@@ -2,10 +2,13 @@ package index
 
 import (
 	"fmt"
+	"os"
 	"sort"
+	"text/tabwriter"
 
 	"github.com/BenJoyenConseil/rmi/estimate"
 	"github.com/BenJoyenConseil/rmi/estimate/linear"
+	"github.com/BenJoyenConseil/rmi/estimate/polynomial"
 	"github.com/BenJoyenConseil/rmi/search"
 )
 
@@ -43,6 +46,46 @@ func New(dataset []float64) *LearnedIndex {
 			minErr = residual
 		}
 	}
+	return &LearnedIndex{M: m, Len: len_, ST: st, MinErrBound: minErr, MaxErrBound: maxErr}
+}
+
+func NewCubic(dataset []float64) *LearnedIndex {
+
+	st := search.NewSortedTable(dataset)
+
+	x, y := polynomial.Cdf(st.Keys)
+	dropDupX, dropDupY := polynomial.DropDuplicates(x, y)
+	dropDupX, dropDupY = polynomial.Segment(dropDupX, dropDupY, 3)
+
+	len_ := len(dataset)
+	m := polynomial.Fit(dropDupX, dropDupY)
+	guesses := make([]int, len_)
+	scaledY := make([]int, len_)
+	maxErr, minErr := 0, 0
+	for i, k := range x {
+		guesses[i] = scale(m.Predict(k), len_)
+		scaledY[i] = scale(y[i], len_)
+		residual := scaledY[i] - guesses[i]
+		if residual > maxErr {
+			maxErr = residual
+		} else if residual < minErr {
+			minErr = residual
+		}
+	}
+
+	w := tabwriter.NewWriter(os.Stdout, 8, 0, 1, ' ', tabwriter.AlignRight)
+	fmt.Fprintln(w, "i\tx\ty\tpred\tresidual\t")
+	for i := 0; i < len(x); i++ {
+		fmt.Fprintf(w, "%d", i+1)
+		fmt.Fprintf(w, "\t%f", x[i])
+		fmt.Fprintf(w, "\t%d", scale(y[i], len_))
+		fmt.Fprintf(w, "\t%d", scale(m.Predict(x[i]), len_))
+		fmt.Fprintf(w, "\t%d", scale(y[i], len_)-scale(m.Predict(x[i]), len_))
+		fmt.Fprintln(w, "\t")
+	}
+	fmt.Fprintln(w)
+	w.Flush()
+
 	return &LearnedIndex{M: m, Len: len_, ST: st, MinErrBound: minErr, MaxErrBound: maxErr}
 }
 
