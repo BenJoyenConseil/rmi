@@ -4,40 +4,16 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/BenJoyenConseil/rmi/linear"
+	"github.com/BenJoyenConseil/rmi/index/linear"
+	"github.com/BenJoyenConseil/rmi/search"
 )
-
-type sortedTable struct {
-	Keys    []float64
-	Offsets []int
-}
-
-// Implement the Sort interface
-type byKeys struct{ *sortedTable }
-
-func (st byKeys) Len() int { return len(st.Keys) }
-func (st byKeys) Swap(i, j int) {
-	st.Keys[i], st.Keys[j] = st.Keys[j], st.Keys[i]
-	st.Offsets[i], st.Offsets[j] = st.Offsets[j], st.Offsets[i]
-}
-func (st byKeys) Less(i, j int) bool { return st.Keys[i] < st.Keys[j] }
-
-func NewSortedTable(x []float64) *sortedTable {
-	keys, offsets := x, make([]int, len(x))
-	for i := range x {
-		offsets[i] = i
-	}
-	st := &sortedTable{Keys: keys, Offsets: offsets}
-	sort.Sort(byKeys{st})
-	return st
-}
 
 /*
 LearnedIndex is an index structure that use inference to locate keys
 */
 type LearnedIndex struct {
 	M                        Estimator
-	ST                       *sortedTable
+	ST                       *search.SortedTable
 	Len                      int
 	MinErrBound, MaxErrBound int
 }
@@ -47,7 +23,7 @@ New return an LearnedIndex fitted over the dataset with a linear regression algo
 */
 func New(dataset []float64) *LearnedIndex {
 
-	st := NewSortedTable(dataset)
+	st := search.NewSortedTable(dataset)
 
 	x, y := linear.Cdf(st.Keys)
 	len_ := len(dataset)

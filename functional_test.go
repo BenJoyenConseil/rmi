@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/BenJoyenConseil/rmi/index"
+	"github.com/BenJoyenConseil/rmi/search"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -23,7 +24,7 @@ func TestIsoFunctional(t *testing.T) {
 	// when Lookup using bsearch, learnedindex, etc..
 	for i := 0.; i <= 100; i++ {
 
-		resultFS, errFS := index.FullScanLookup(i, li.ST)
+		resultFS, errFS := search.FullScanLookup(i, li.ST)
 		resultLI, errLI := li.Lookup(i)
 		//resultCI, errCI := ci.Lookup(i)
 

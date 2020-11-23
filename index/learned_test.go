@@ -4,22 +4,12 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/BenJoyenConseil/rmi/linear"
+	"github.com/BenJoyenConseil/rmi/index/linear"
+	"github.com/BenJoyenConseil/rmi/search"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewSortedTable(t *testing.T) {
-	// given
-	unsortedkeys := []float64{5, 3, 3, 3.14, 10, 2.5, 2.98}
-
-	// when
-	st := NewSortedTable(unsortedkeys)
-
-	// then
-	assert.Equal(t, []float64{2.5, 2.98, 3, 3, 3.14, 5, 10}, st.Keys)
-	assert.Equal(t, []int{5, 6, 1, 2, 3, 0, 4}, st.Offsets)
-}
 func TestNew(t *testing.T) {
 	keys := []float64{5, 3, 3, 3.14, 10, 2.5, 2.98}
 
@@ -73,7 +63,7 @@ func TestLookup(t *testing.T) {
 		//	keys : {5, 3, 3, 3.14, 10, 2.5, 2.98}
 		//  sort : {2.5, 2.98, 3, 3, 3.14, 5, 10}
 		//  posi : {0,   1,    2, 3, 4,    5, 6}
-		ST: &sortedTable{
+		ST: &search.SortedTable{
 			Keys:    []float64{2.5, 2.98, 3, 3, 3.14, 5, 10},
 			Offsets: []int{5, 6, 1, 2, 3, 0, 4},
 		},
