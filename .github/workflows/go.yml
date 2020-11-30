@@ -39,7 +39,7 @@ jobs:
     - name: Benchmarks
       run: make bench
 
-    - name: Benchmarks
+    - name: Coverage
       run: make coverage
 
     - name: Upload coverage to Codecov
