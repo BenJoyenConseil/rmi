@@ -38,3 +38,14 @@ jobs:
 
     - name: Benchmarks
       run: make bench
+
+    - name: Benchmarks
+      run: make coverage
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+        file: ./coverage.txt
+        flags: unittests
+        directory: ./
+        fail_ci_if_error: true
+        verbose: true
