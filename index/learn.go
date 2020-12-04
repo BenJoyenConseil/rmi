@@ -24,6 +24,7 @@ New return an LearnedIndex fitted over the dataset with a linear regression algo
 func New(dataset []float64) *LearnedIndex {
 
 	st := search.NewSortedTable(dataset)
+	// store.Flush(st)
 
 	x, y := linear.Cdf(st.Keys)
 	len_ := len(dataset)
@@ -78,17 +79,19 @@ Lookup return the first offsets of the key or err if the key is not found in the
 func (idx *LearnedIndex) Lookup(key float64) (offsets []int, err error) {
 	guess, lower, upper := idx.GuessIndex(key)
 	i := 0
+	// k, o, err := store.Get(guess_i)
+	// st, err := store.STExtract(guess_i+1, upper+1)
 
 	if key > idx.ST.Keys[guess] {
 		subKeys := idx.ST.Keys[guess+1 : upper+1]
 		i = sort.SearchFloat64s(subKeys, key) + guess + 1
 	} else if key <= idx.ST.Keys[guess] {
-		subKeys := idx.ST.Keys[lower:guess]
+		subKeys := idx.ST.Keys[lower : guess+1]
 		i = sort.SearchFloat64s(subKeys, key) + lower
 	}
 
 	// iterate to get all equal keys
-	for ; i < len(idx.ST.Keys); i++ {
+	for ; i < upper+1; i++ {
 		if idx.ST.Keys[i] == key {
 			offsets = append(offsets, idx.ST.Offsets[i])
 		} else {
