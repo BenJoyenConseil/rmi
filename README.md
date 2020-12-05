@@ -53,11 +53,11 @@ and the current age's value (the Keys of the index) :
 - [x] Return a list of lines matching the key
 - [x] Use max + min error bounding elements to search quickly
 - [x] Benchmarks InMemory LearnedIndex against InMem BinarySearch
-- [ ] Store offset lines and a primary key index
+- [x] Store offset lines and a primary key index
 - [ ] Store the sortedTable
+- [ ] CLI to create indexes over CSV
 - [ ] Benchmarks Learned against BinarySearchTree
 - [ ] A two layer recursive index
-- [ ] CLI to create indexes over CSV
 - [ ] Learn on integer
 - [ ] Index is persistent and durable (on hard drive)
 - [ ] A sort algorythm using learned structure

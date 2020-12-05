@@ -10,6 +10,7 @@ const (
 	KEY_LEN    = 8         // float64
 	VALUE_LEN  = 8         //  uint64
 	RECORD_LEN = int64(16) // KEY_LEN + VALUE_LEN
+	HEADER     = 8
 )
 
 // Record is a key/value paire
@@ -20,11 +21,11 @@ func (r Record) Key() float64 {
 }
 
 func (r Record) Value() uint64 {
-	return binary.LittleEndian.Uint64(r[VALUE_LEN:])
+	return binary.LittleEndian.Uint64(r[KEY_LEN:])
 }
 
 func ToRecord(key float64, value uint64) Record {
-	r := make([]byte, KEY_LEN+VALUE_LEN)
+	r := make([]byte, RECORD_LEN)
 	binary.LittleEndian.PutUint64(r[:KEY_LEN], math.Float64bits(key))
 	binary.LittleEndian.PutUint64(r[KEY_LEN:], value)
 	return r
@@ -42,12 +43,40 @@ type Store struct {
 }
 
 func (s Store) Get(i int64) Record {
-	offset := i * RECORD_LEN
+	offset := i*RECORD_LEN + HEADER
 	b := make([]byte, RECORD_LEN)
-	s.ReadAt(b, offset)
+	_, err := s.ReadAt(b, offset)
+	check(err)
 	return Record(b)
 }
 
 func (s Store) Put(r Record) {
-	s.Write(r)
+	count := s.RecordCount()
+	offset := count*RECORD_LEN + HEADER
+	_, err := s.WriteAt(r, offset)
+	check(err)
+	s.setRecordCount(count + 1)
+}
+
+func (s Store) RecordCount() int64 {
+	b := make([]byte, HEADER)
+	_, err := s.ReadAt(b, 0)
+	if err != nil {
+		return int64(0)
+	}
+	return int64(binary.LittleEndian.Uint64(b))
+}
+
+func (s Store) setRecordCount(n int64) {
+	b := make([]byte, HEADER)
+	binary.LittleEndian.PutUint64(b, uint64(n))
+
+	_, err := s.WriteAt(b, 0)
+	check(err)
+}
+
+func check(e error) {
+	if e != nil {
+		panic(e)
+	}
 }
