@@ -2,6 +2,7 @@ package store
 
 import (
 	"encoding/binary"
+	"log"
 	"math"
 	"os"
 )
@@ -37,11 +38,14 @@ func FromRecord(r Record) (key float64, value uint64) {
 	return key, value
 }
 
-// Store is where we store key value paires
+// Store is a os.File where we store key value paires
 type Store struct {
 	*os.File
 }
 
+/*
+Get reads the store file at offset i and return a Record byte array
+*/
 func (s Store) Get(i int64) Record {
 	offset := i*RECORD_LEN + HEADER
 	b := make([]byte, RECORD_LEN)
@@ -50,14 +54,21 @@ func (s Store) Get(i int64) Record {
 	return Record(b)
 }
 
+/*
+Put appends a Record to the store file
+*/
 func (s Store) Put(r Record) {
 	count := s.RecordCount()
 	offset := count*RECORD_LEN + HEADER
+	log.Println(count, RECORD_LEN, HEADER, offset)
 	_, err := s.WriteAt(r, offset)
 	check(err)
 	s.setRecordCount(count + 1)
 }
 
+/*
+RecordCount reads the first byte as
+*/
 func (s Store) RecordCount() int64 {
 	b := make([]byte, HEADER)
 	_, err := s.ReadAt(b, 0)

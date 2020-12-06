@@ -2,6 +2,7 @@ package cli
 
 import (
 	"encoding/csv"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -14,8 +15,7 @@ import (
 )
 
 const (
-	IndexFile            = "index.rmi"
-	IndexFileName        = "./index.rmi"
+	IndexFileName        = "data/index.rmi"
 	DefaultPlotImgFormat = "svg"
 	DefaultPlotFolder    = "assets"
 )
@@ -27,6 +27,10 @@ var (
 	fileToIndex   = create.Flag("csv", "The CSV file you want to index").Short('f').Required().String()
 	columnToIndex = create.Flag("column", "The column you want to index").Short('c').Required().String()
 	createAction  = create.Action(createIndex)
+
+	count          = app.Command("count", "read the first Byte where the count is stored and print it")
+	countIndexFile = count.Flag("index", "the index file").Short('i').Default(IndexFileName).ExistingFile()
+	countAction    = count.Action(countElements)
 
 	select_         = app.Command("search", "query the index file found in the targeted directory")
 	selectIndexFile = select_.Flag("index", "the index file").Short('i').Default(IndexFileName).ExistingFile()
@@ -45,17 +49,26 @@ func Parse(args []string) {
 }
 
 func createIndex(c *kingpin.ParseContext) error {
-	// file := "data/people.csv"
 	ageColumn := extractColumn(*fileToIndex, *columnToIndex)
 
 	// create an index over the age column
 	idx := index.New(ageColumn)
-	storeFile, _ := os.OpenFile(IndexFileName, os.O_CREATE|os.O_WRONLY, 0644)
+	storeFile, _ := os.OpenFile(IndexFileName, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0644)
 	s := store.Store{storeFile}
+
 	for i := 0; i < idx.Len; i++ {
-		s.Put(store.ToRecord(idx.ST.Keys[i], uint64(idx.ST.Offsets[i])))
+		log.Println(idx.ST.Keys[i], uint64(idx.ST.Offsets[i]))
+		r := store.ToRecord(idx.ST.Keys[i], uint64(idx.ST.Offsets[i]))
+		s.Put(r)
 	}
 	return nil
+}
+
+func countElements(c *kingpin.ParseContext) error {
+	storeFile, err := os.OpenFile(IndexFileName, os.O_RDONLY, 0644)
+	s := store.Store{storeFile}
+	fmt.Println(s.RecordCount())
+	return err
 }
 
 func selectWhere(c *kingpin.ParseContext) error {

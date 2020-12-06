@@ -1,6 +1,7 @@
 package store
 
 import (
+	"encoding/binary"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -80,16 +81,19 @@ func TestPut(t *testing.T) {
 	tmpDir := t.TempDir()
 	f, _ := ioutil.TempFile(tmpDir, "*")
 	store := Store{f}
-	r := Record([]byte{66, 96, 229, 208, 34, 199, 103, 64, 5, 0, 0, 0, 0, 0, 0, 0}) // record(190.223, 5)
+	r := Record([]byte{1, 0, 0, 8, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0})  // record(1.0, 1)
+	r2 := Record([]byte{2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0}) // record(2.0, 2)
 
 	// when
 	store.Put(r)
-	store.Put(r)
+	store.Put(r2)
 
 	// then
 	result := make([]byte, 16)
 	f.ReadAt(result, 8)
-	assert.ElementsMatch(t, result, []byte{66, 96, 229, 208, 34, 199, 103, 64, 5, 0, 0, 0, 0, 0, 0, 0})
+	assert.ElementsMatch(t, result, []byte{1, 0, 0, 8, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0})
+	f.ReadAt(result, 24)
+	assert.ElementsMatch(t, result, []byte{2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0})
 
 	count := make([]byte, 8)
 	f.ReadAt(count, 0)
@@ -122,6 +126,22 @@ func TestRecordCount_NotExits(t *testing.T) {
 
 	// then
 	assert.Equal(t, int64(0), c)
+}
+
+func TestSetRecordCount(t *testing.T) {
+	// given
+	tmpDir := t.TempDir()
+	f, _ := ioutil.TempFile(tmpDir, "*")
+	store := Store{f}
+
+	// when
+	store.setRecordCount(15)
+
+	// then
+	f.Seek(0, 0)
+	count := make([]byte, 8)
+	f.Read(count)
+	assert.Equal(t, uint64(15), binary.LittleEndian.Uint64(count))
 }
 
 func ExampleStore() {
