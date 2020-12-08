@@ -55,7 +55,7 @@ and the current age's value (the Keys of the index) :
 - [x] Benchmarks InMemory LearnedIndex against InMem BinarySearch
 - [x] Store offset lines and a primary key index
 - [ ] Store the sortedTable
-- [ ] CLI to create indexes over CSV
+- [x] CLI to create indexes over CSV
 - [ ] Benchmarks Learned against BinarySearchTree
 - [ ] A two layer recursive index
 - [ ] Learn on integer
