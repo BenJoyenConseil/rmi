@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/BenJoyenConseil/rmi/linear"
+	"github.com/BenJoyenConseil/rmi/estimate/linear"
 	"github.com/BenJoyenConseil/rmi/search"
 
 	"github.com/stretchr/testify/assert"

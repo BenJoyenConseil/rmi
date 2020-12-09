@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/BenJoyenConseil/rmi/linear"
+	"github.com/BenJoyenConseil/rmi/estimate"
+	"github.com/BenJoyenConseil/rmi/estimate/linear"
 	"github.com/BenJoyenConseil/rmi/search"
 )
 
@@ -12,7 +13,7 @@ import (
 LearnedIndex is an index structure that use inference to locate keys
 */
 type LearnedIndex struct {
-	M                        Estimator
+	M                        estimate.Estimator
 	ST                       *search.SortedTable
 	Len                      int
 	MinErrBound, MaxErrBound int
