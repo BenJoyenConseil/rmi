@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/BenJoyenConseil/rmi/index/linear"
+	"github.com/BenJoyenConseil/rmi/linear"
 	"github.com/BenJoyenConseil/rmi/search"
 )
 
