@@ -33,3 +33,11 @@ func NewSortedTable(x []float64) *SortedTable {
 	sort.Sort(byKeys{st})
 	return st
 }
+
+func (st *SortedTable) Get(i int) (key float64, rowid int) {
+	return st.Keys[i], st.Offsets[i]
+}
+
+func (st *SortedTable) Len() int {
+	return len(st.Keys)
+}

@@ -12,6 +12,11 @@ const (
 	VALUE_LEN  = 8         //  uint64
 	RECORD_LEN = int64(16) // KEY_LEN + VALUE_LEN
 	HEADER     = 8
+
+	VERSION          = "v0.0.0"
+	METADATA_LEN     = 4
+	RECORD_COUNT_LEN = 8
+	HEADERS          = len(VERSION) + RECORD_COUNT_LEN + METADATA_LEN
 )
 
 // Record is a key/value paire
@@ -84,6 +89,10 @@ func (s Store) setRecordCount(n int64) {
 
 	_, err := s.WriteAt(b, 0)
 	check(err)
+}
+
+func (s Store) MetadataLen() int32 {
+	panic("not implemented")
 }
 
 func check(e error) {
