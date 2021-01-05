@@ -144,6 +144,8 @@ func TestSetRecordCount(t *testing.T) {
 	assert.Equal(t, uint64(15), binary.LittleEndian.Uint64(count))
 }
 
+func
+
 func ExampleStore() {
 
 	tmpDir := os.TempDir()
